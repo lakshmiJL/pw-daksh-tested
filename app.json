@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "paaswala",
+    "slug": "paaswala",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./src/assets/splash-screen.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0051D5"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.daksh.paaswala"
+    },
+    "android": {
+      "package": "com.daksh.paaswala",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./src/assets/favicon.png"
+    },
+    "plugins": [
+      "@react-native-community/datetimepicker"
+    ]
+  }
+}
