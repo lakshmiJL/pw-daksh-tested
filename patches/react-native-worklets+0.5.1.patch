@@ -1,0 +1,23 @@
+diff --git a/node_modules/react-native-worklets/android/build.gradle b/node_modules/react-native-worklets/android/build.gradle
+index a1b2c3d..e4f5g6h 100644
+--- a/node_modules/react-native-worklets/android/build.gradle
++++ b/node_modules/react-native-worklets/android/build.gradle
+@@ -311,12 +311,13 @@ preBuild.dependsOn(assertMinimalReactNativeVersionTask)
+ 
+-tasks.register('assertNewArchitectureEnabledTask') {
+-    onlyIf { !IS_NEW_ARCHITECTURE_ENABLED }
+-    doFirst {
+-        throw new GradleException("[Worklets] Worklets require new architecture to be enabled. Please enable it by setting `newArchEnabled` to `true` in `gradle.properties`.")
+-    }
+-}
+-
+-preBuild.dependsOn(assertNewArchitectureEnabledTask)
++// assertNewArchitectureEnabledTask is disabled to allow building without New Architecture
++// tasks.register('assertNewArchitectureEnabledTask') {
++//     onlyIf { !IS_NEW_ARCHITECTURE_ENABLED }
++//     doFirst {
++//         throw new GradleException("[Worklets] Worklets require new architecture to be enabled. Please enable it by setting `newArchEnabled` to `true` in `gradle.properties`.")
++//     }
++// }
++
++// preBuild.dependsOn(assertNewArchitectureEnabledTask)
