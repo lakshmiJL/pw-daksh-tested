@@ -1,5 +1,5 @@
 diff --git a/node_modules/expo-firebase-core/android/build.gradle b/node_modules/expo-firebase-core/android/build.gradle
-index a1b2c3d..e4f5g6h 100644
+index 9bda09b..40b54ef 100644
 --- a/node_modules/expo-firebase-core/android/build.gradle
 +++ b/node_modules/expo-firebase-core/android/build.gradle
 @@ -37,7 +37,7 @@ buildscript {
@@ -21,3 +21,59 @@ index a1b2c3d..e4f5g6h 100644
  
    compileOptions {
      sourceCompatibility JavaVersion.VERSION_11
+diff --git a/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCoreModule.java b/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCoreModule.java
+index 0bb4e53..998a790 100644
+--- a/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCoreModule.java
++++ b/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCoreModule.java
+@@ -12,10 +12,9 @@ import java.util.HashMap;
+ import com.google.firebase.FirebaseApp;
+ import com.google.firebase.FirebaseOptions;
+ 
+-import expo.modules.core.ExportedModule;
+ import expo.modules.core.ModuleRegistry;
+ 
+-public class FirebaseCoreModule extends ExportedModule {
++public class FirebaseCoreModule {
+   private static final String NAME = "ExpoFirebaseCore";
+   private static final String DEFAULT_APP_NAME = "[DEFAULT]";
+ 
+@@ -46,12 +45,12 @@ public class FirebaseCoreModule extends ExportedModule {
+     return constants;
+   }
+ 
+-  @Override
++  // @Override
+   public String getName() {
+     return NAME;
+   }
+ 
+-  @Override
++  // @Override
+   public void onCreate(ModuleRegistry moduleRegistry) {
+     mModuleRegistry = moduleRegistry;
+   }
+diff --git a/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCorePackage.java b/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCorePackage.java
+index 25ca450..c6bd96f 100644
+--- a/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCorePackage.java
++++ b/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCorePackage.java
+@@ -6,7 +6,6 @@ import java.util.Collections;
+ import java.util.List;
+ 
+ import expo.modules.core.BasePackage;
+-import expo.modules.core.ExportedModule;
+ import expo.modules.core.interfaces.InternalModule;
+ 
+ public class FirebaseCorePackage extends BasePackage {
+@@ -15,8 +14,8 @@ public class FirebaseCorePackage extends BasePackage {
+     return Collections.singletonList((InternalModule) new FirebaseCoreService(context));
+   }
+ 
+-  @Override
+-  public List<ExportedModule> createExportedModules(Context context) {
+-    return Collections.singletonList((ExportedModule) new FirebaseCoreModule(context));
+-  }
++  // @Override
++  // public List<ExportedModule> createExportedModules(Context context) {
++  //   return Collections.singletonList((ExportedModule) new FirebaseCoreModule(context));
++  // }
+ }
