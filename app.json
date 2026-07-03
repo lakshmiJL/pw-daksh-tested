@@ -13,15 +13,23 @@
       "resizeMode": "contain",
       "backgroundColor": "#0051D5"
     },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.daksh.paaswala"
-    },
     "android": {
       "package": "com.daksh.paaswala",
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.daksh.paaswala",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Paaswala needs your location to find nearby vendors and set your delivery address.",
+        "NSLocationAlwaysUsageDescription": "Paaswala uses your location to alert you when vendors enter your mohalla."
       }
     },
     "web": {

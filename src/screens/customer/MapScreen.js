@@ -55,6 +55,13 @@ if(Platform.OS==='web'){
         </View>
     );
 }
+if(!MapView){
+    return(
+        <View style={styles.center}>
+            <Text>Map could not be loaded on this device.</Text>
+        </View>
+    );
+}
 return(
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.header}>
