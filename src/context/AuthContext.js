@@ -13,6 +13,7 @@ import {
 import * as Google from 'expo-auth-session/providers/google';
 import { makeRedirectUri } from 'expo-auth-session';
 import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Crypto from 'expo-crypto';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import { auth, db, firebaseConfig } from '../services/firebase/firebaseConfig';
 import { getDoc, setDoc, doc } from 'firebase/firestore';
@@ -132,23 +133,32 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ✅ FIXED: Apple Login with better error handling
+  // ✅ FIXED: Apple Login with proper Firebase nonce handling
   const appleLogin = async () => {
     if (Platform.OS !== 'ios') {
       throw new Error('Apple Sign In is only available on iOS devices');
     }
 
     try {
+      // Firebase requires a nonce for Apple Sign-In
+      const rawNonce = Math.random().toString(36).substring(2, 10);
+      const hashedNonce = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        rawNonce
+      );
+
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.EMAIL,
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
         ],
+        nonce: hashedNonce,
       });
 
       const provider = new OAuthProvider('apple.com');
       const authCredential = provider.credential({
         idToken: credential.identityToken,
+        rawNonce: rawNonce,
       });
 
       const userCredential = await signInWithCredential(auth, authCredential);
