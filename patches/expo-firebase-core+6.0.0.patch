@@ -22,7 +22,7 @@ index 9bda09b..40b54ef 100644
    compileOptions {
      sourceCompatibility JavaVersion.VERSION_11
 diff --git a/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCoreModule.java b/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCoreModule.java
-index 0bb4e53..998a790 100644
+index 0bb4e53..96862b6 100644
 --- a/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCoreModule.java
 +++ b/node_modules/expo-firebase-core/android/src/main/java/expo/modules/firebase/core/FirebaseCoreModule.java
 @@ -12,10 +12,9 @@ import java.util.HashMap;
@@ -37,6 +37,15 @@ index 0bb4e53..998a790 100644
    private static final String NAME = "ExpoFirebaseCore";
    private static final String DEFAULT_APP_NAME = "[DEFAULT]";
  
+@@ -23,7 +22,7 @@ public class FirebaseCoreModule extends ExportedModule {
+   private Map<String, String> mDefaultOptions;
+ 
+   public FirebaseCoreModule(Context context) {
+-    super(context);
++    // super(context);
+   }
+ 
+   @Nullable
 @@ -46,12 +45,12 @@ public class FirebaseCoreModule extends ExportedModule {
      return constants;
    }
