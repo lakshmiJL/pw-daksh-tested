@@ -6,7 +6,7 @@ import { COLORS, FONTS, SPACING, RADIUS } from '../../constants';
 const WelcomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
       
       <View style={styles.topSection}>
         <View style={styles.iconContainer}>
@@ -45,30 +45,34 @@ const styles = StyleSheet.create({
     flex: 1.2,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
-    borderBottomLeftRadius: 60,
-    borderBottomRightRadius: 60,
+    backgroundColor: COLORS.primary,
+    borderBottomLeftRadius: 50,
+    borderBottomRightRadius: 50,
     shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.05,
-    shadowRadius: 20,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.15,
+    shadowRadius: 25,
+    elevation: 8,
+    overflow: 'visible',
+    position: 'relative',
   },
   iconContainer: {
     width: 140,
     height: 140,
-    backgroundColor: COLORS.white,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 70,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 15 },
+    shadowOpacity: 0.2,
     shadowRadius: 20,
-    elevation: 8,
+    elevation: 10,
+    borderWidth: 4,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
   iconEmoji: {
-    fontSize: 60,
+    fontSize: 65,
   },
   bottomSection: {
     flex: 1,

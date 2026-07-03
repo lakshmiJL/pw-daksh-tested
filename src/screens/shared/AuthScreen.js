@@ -195,8 +195,8 @@ const styles = StyleSheet.create({
   mainButton: { backgroundColor: '#007AFF', width: '100%', maxWidth: 300, padding: 15, borderRadius: 8, alignItems: 'center', marginVertical: 10 },
   mainButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   roleContainer: { marginVertical: 15, width: '100%', maxWidth: 300 },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  roleButton: { padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, width: '48%', alignItems: 'center' },
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%' },
+  roleButton: { paddingVertical: 10, paddingHorizontal: 5, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, flex: 1, marginHorizontal: 5, alignItems: 'center' },
   activeRole: { backgroundColor: '#007AFF', borderColor: '#007AFF' },
   roleText: { color: '#333' },
   activeText: { color: '#fff', fontWeight: 'bold' },
@@ -204,6 +204,6 @@ const styles = StyleSheet.create({
   googleButton: { backgroundColor: '#DB4437', width: '100%', maxWidth: 300, padding: 15, borderRadius: 30, alignItems: 'center' },
   googleText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   appleButton: { width: '100%', maxWidth: 300, height: 50, marginTop: 10 },
-  switchButton: { marginTop: 15 },
-  switchText: { color: '#007AFF', fontSize: 14 }
+  switchButton: { marginTop: 15, width: '100%', paddingHorizontal: 10, alignItems: 'center' },
+  switchText: { color: '#007AFF', fontSize: 14, textAlign: 'center', width: '100%' }
 });
