@@ -1,0 +1,14 @@
+diff --git a/node_modules/react-native-pdf/android/build.gradle b/node_modules/react-native-pdf/android/build.gradle
+index a1b2c3d..e4f5g6h 100644
+--- a/node_modules/react-native-pdf/android/build.gradle
++++ b/node_modules/react-native-pdf/android/build.gradle
+@@ -84,7 +84,8 @@ android {
+     if (agpVersion.tokenize('.')[0].toInteger() >= 7) {
+         namespace "org.wonday.pdf"
+     }
+-    compileSdkVersion safeExtGet('compileSdkVersion', 31)
++    compileSdk safeExtGet('compileSdkVersion', 35)
++    compileSdkVersion safeExtGet('compileSdkVersion', 35)
+ 
+     defaultConfig {
+         minSdkVersion safeExtGet('minSdkVersion', 21)
