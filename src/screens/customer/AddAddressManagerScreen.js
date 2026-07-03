@@ -15,9 +15,9 @@ import{
 import MapView,{Marker} from 'react-native-maps';
 import * as Location from 'expo-location';
 import {doc,updateDoc,getDoc,arrayUnion} from 'firebase/firestore';
-import {db} from '../../context/AuthContext';
+import {db} from '../../services/firebase/firebaseConfig';
+import {useAuth} from '../../context/AuthContext';
 import {COLORS,FONTS,SPACING,RADIUS} from '../../constants';
-import { useStateForPath } from '@react-navigation/native';
 const ADDRESS_TYPES=[
     {id:'home',label:'Home',emoji:'🏠'},
     {id:'work',label:'Work',emoji:'💼'},

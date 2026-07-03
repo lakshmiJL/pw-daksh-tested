@@ -11,6 +11,7 @@ import {
   OAuthProvider
 } from 'firebase/auth';
 import * as Google from 'expo-auth-session/providers/google';
+import { makeRedirectUri } from 'expo-auth-session';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import { auth, db, firebaseConfig } from '../services/firebase/firebaseConfig';
@@ -34,7 +35,11 @@ export function AuthProvider({ children }) {
   const [request, response, promptAsync] = Google.useAuthRequest({
     expoClientId: '741920079969-shfcjka54slncmjhetb0m023b0fgn168.apps.googleusercontent.com',
     iosClientId: '741920079969-o56gu4c5cur60ctfcgp2cpb75ld2sgjp.apps.googleusercontent.com',
-    androidClientId: '741920079969-h8dkjg7qsdf0mtgfcors4qrhf5v3i5no.apps.googleusercontent.com'
+    androidClientId: '741920079969-h8dkjg7qsdf0mtgfcors4qrhf5v3i5no.apps.googleusercontent.com',
+    redirectUri: makeRedirectUri({
+      scheme: 'com.daksh.paaswala',
+      path: 'oauth2redirect/google',
+    }),
   });
 
   // ✅ FIX: Handle Google OAuth response

@@ -60,7 +60,7 @@ export default function CartScreen({ navigation }) {
   
   navigation.navigate('Payment', {
     orderData,
-    totalAmount: finalTotal,
+    totalAmount: cartTotal,
     deliveryFee,
     paymentMethod,
   });
