@@ -9,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { doc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, addDoc, deleteDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../services/firebase/firebaseConfig';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartProvider';
@@ -136,22 +136,13 @@ export default function PaymentScreen({ route, navigation }) {
       });
       clearCart();
     } else if (result.cancelled) {
-      // User cancelled — delete the pending order
-      await updateDoc(doc(db, 'orders', orderId), {
-        status: 'cancelled',
-        cancelledBy: 'customer',
-        cancelledAt: new Date(),
-        cancelReason: 'Payment cancelled by user',
-      });
+      // User cancelled — delete the pending order so it doesn't show up for vendors
+      await deleteDoc(doc(db, 'orders', orderId));
       Alert.alert('Payment Cancelled', 'Your order was not placed.');
     } else {
-      // Payment failed — record it and show error
+      // Payment failed — record it, delete ghost order, and show error
       await recordPaymentFailure(orderId, result.error);
-      await updateDoc(doc(db, 'orders', orderId), {
-        status: 'cancelled',
-        cancelledBy: 'system',
-        cancelReason: `Payment failed: ${result.error}`,
-      });
+      await deleteDoc(doc(db, 'orders', orderId));
       Alert.alert(
         'Payment Failed',
         result.error || 'Your payment could not be processed. Please try again.',
