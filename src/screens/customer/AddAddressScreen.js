@@ -56,6 +56,8 @@ export default function AddAddressScreen({ route, navigation }) {
   const [showMap, setShowMap] = useState(false);
 
   const mapRef = useRef(null);
+  // Stores the coords we want to animate to once the map mounts
+  const pendingAnimateRef = useRef(null);
 
   const handleGetCurrentLocation = async () => {
     setLocating(true);
@@ -81,22 +83,34 @@ export default function AddAddressScreen({ route, navigation }) {
         if (!pincode) setPincode(place.postalCode || '');
       }
 
+      // Store coords for post-mount animation (mapRef.current is null until showMap renders)
+      pendingAnimateRef.current = { latitude, longitude };
       setShowMap(true);
       setLocating(false);
-
-      // Animate map to new location
-      mapRef.current?.animateToRegion({
-        latitude,
-        longitude,
-        latitudeDelta: 0.002,
-        longitudeDelta: 0.002,
-      });
     } catch (error) {
       console.error('Location error:', error);
       Alert.alert('Error', 'Could not get your location. Please enter manually.');
       setLocating(false);
     }
   };
+
+  // Animate to the user's location once the MapView has mounted
+  useEffect(() => {
+    if (showMap && pendingAnimateRef.current && mapRef.current) {
+      const { latitude, longitude } = pendingAnimateRef.current;
+      // Small delay to allow the MapView to fully mount before animating
+      const timer = setTimeout(() => {
+        mapRef.current?.animateToRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.002,
+          longitudeDelta: 0.002,
+        });
+        pendingAnimateRef.current = null;
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [showMap]);
 
   const handleMapPress = (e) => {
     setLocation(e.nativeEvent.coordinate);

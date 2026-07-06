@@ -9,11 +9,11 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { doc, updateDoc, addDoc, deleteDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../services/firebase/firebaseConfig';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartProvider';
-import { initiateRazorpayPayment, recordPaymentFailure } from '../../services/api/razorpayService';
+import { initiateRazorpayPayment } from '../../services/api/razorpayService';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../services/firebase/firebaseConfig';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants';
 
 const PAYMENT_METHODS = [
@@ -102,47 +102,36 @@ export default function PaymentScreen({ route, navigation }) {
 
   // ── Razorpay (UPI / Card / Netbanking) ────────────────────────────────────
   const handleRazorpayPayment = async () => {
-    // Step 1: Create the order in Firestore first (so we have an ID)
-    const orderRef = await addDoc(collection(db, 'orders'), {
-      ...orderData,
-      paymentMethod: selectedMethod,
-      paymentStatus: 'pending',
-      totalAmount: grandTotal,
-      deliveryFee,
-      status: 'pending',
-      customerId: currentUser.uid,
-      createdAt: serverTimestamp(),
-    });
-
-    const orderId = orderRef.id;
-
-    // Step 2: Open Razorpay
+    // Step 1: Open Razorpay — do NOT create the order yet.
+    // We only create the Firestore order after payment is confirmed,
+    // so no ghost orders appear if the user cancels or payment fails.
     const result = await initiateRazorpayPayment({
       amount: grandTotal,           // in rupees — service converts to paise
-      orderId,
+      orderData: {                  // passed through so service can create order on success
+        ...orderData,
+        paymentMethod: selectedMethod,
+        totalAmount: grandTotal,
+        deliveryFee,
+        customerId: currentUser.uid,
+      },
       customerName: currentUser.displayName || '',
       customerEmail: currentUser.email || '',
       customerPhone: currentUser.phoneNumber || '',
-      description: `Order #${orderId.slice(-6)} — Paaswala`,
+      description: `Paaswala Order`,
     });
 
-    // Step 3: Handle result
+    // Step 2: Handle result
     if (result.success) {
       navigation.replace('OrderConfirmation', {
-        orderId,
+        orderId: result.orderId,
         paymentMethod: selectedMethod,
         paymentId: result.paymentId,
         totalAmount: grandTotal,
       });
       clearCart();
     } else if (result.cancelled) {
-      // User cancelled — delete the pending order so it doesn't show up for vendors
-      await deleteDoc(doc(db, 'orders', orderId));
       Alert.alert('Payment Cancelled', 'Your order was not placed.');
     } else {
-      // Payment failed — record it, delete ghost order, and show error
-      await recordPaymentFailure(orderId, result.error);
-      await deleteDoc(doc(db, 'orders', orderId));
       Alert.alert(
         'Payment Failed',
         result.error || 'Your payment could not be processed. Please try again.',

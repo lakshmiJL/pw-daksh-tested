@@ -16,7 +16,7 @@ if (Platform.OS !== 'web') {
     console.warn('Razorpay could not be loaded:', e);
   }
 }
-import { doc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
 
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
@@ -43,7 +43,7 @@ const RAZORPAY_KEY_ID = 'rzp_test_T55EbaplJKBpPx'; // ← REPLACE THIS
 export const initiateRazorpayPayment = async (options) => {
   const {
     amount,
-    orderId,
+    orderData,          // Full order payload — written to Firestore only on success
     customerName = '',
     customerEmail = '',
     customerPhone = '',
@@ -63,23 +63,8 @@ export const initiateRazorpayPayment = async (options) => {
       name: customerName,
     },
     theme: { color: '#007AFF' },
-    // Enable all payment methods
-    config: {
-      display: {
-        blocks: {
-          utib: { name: 'Pay via UPI', instruments: [{ method: 'upi' }] },
-          other: {
-            name: 'Other Payment Modes', instruments: [
-              { method: 'card' },
-              { method: 'netbanking' },
-              { method: 'wallet' },
-            ]
-          },
-        },
-        sequence: ['block.utib', 'block.other'],
-        preferences: { show_default_blocks: false },
-      },
-    },
+    // Do NOT add config.display overrides — they restrict payment methods
+    // and cause "Can't pay with this UPI ID" errors.
   };
 
   if (Platform.OS === 'web' || !RazorpayCheckout) {
@@ -92,69 +77,56 @@ export const initiateRazorpayPayment = async (options) => {
   return new Promise((resolve) => {
     RazorpayCheckout.open(razorpayOptions)
       .then(async (paymentData) => {
-        // Payment successful - paymentData.razorpay_payment_id
+        // Payment confirmed — NOW create the order in Firestore
         try {
-          await recordPaymentSuccess(orderId, paymentData.razorpay_payment_id, amount);
-          resolve({ success: true, paymentId: paymentData.razorpay_payment_id });
+          const orderRef = await addDoc(collection(db, 'orders'), {
+            ...orderData,
+            paymentStatus: 'paid',
+            status: 'pending',
+            razorpayPaymentId: paymentData.razorpay_payment_id,
+            paidAt: serverTimestamp(),
+            createdAt: serverTimestamp(),
+          });
+
+          const orderId = orderRef.id;
+
+          // Also log to payments collection for audit trail
+          await addDoc(collection(db, 'payments'), {
+            orderId,
+            razorpayPaymentId: paymentData.razorpay_payment_id,
+            amount,
+            currency: 'INR',
+            status: 'success',
+            createdAt: serverTimestamp(),
+          });
+
+          resolve({ success: true, paymentId: paymentData.razorpay_payment_id, orderId });
         } catch (dbError) {
-          console.error('DB update after payment failed:', dbError);
-          // Payment was still successful even if DB update failed
-          resolve({ success: true, paymentId: paymentData.razorpay_payment_id });
+          console.error('DB write after payment failed:', dbError);
+          // Payment was collected but order wasn't saved — still resolve success
+          // so UI can inform user and support can reconcile manually
+          resolve({ success: true, paymentId: paymentData.razorpay_payment_id, orderId: null });
         }
       })
       .catch((error) => {
-        // error.code: 0 = user cancelled, 1 = payment failed, 2 = network error
-        const userCancelled = error.code === 0;
+        // error.code === 0 means user cancelled (varies by SDK version)
+        // Also check description string as a fallback
+        const desc = (error.description || '').toLowerCase();
+        const userCancelled =
+          error.code === 0 ||
+          desc.includes('cancel') ||
+          desc.includes('dismissed');
         resolve({
           success: false,
           cancelled: userCancelled,
-          error: userCancelled ? 'Payment cancelled' : error.description || 'Payment failed',
+          error: userCancelled
+            ? 'Payment cancelled'
+            : error.description || 'Payment failed',
         });
       });
   });
 };
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-
-/**
- * Updates Firestore order with payment confirmation details
- */
-const recordPaymentSuccess = async (orderId, razorpayPaymentId, amount) => {
-  const orderRef = doc(db, 'orders', orderId);
-  await updateDoc(orderRef, {
-    paymentStatus: 'paid',
-    paymentMethod: 'razorpay',
-    razorpayPaymentId,
-    paidAt: new Date(),
-    paidAmount: amount,
-  });
-
-  // Also log to a payments collection for audit trail
-  await addDoc(collection(db, 'payments'), {
-    orderId,
-    razorpayPaymentId,
-    amount,
-    currency: 'INR',
-    status: 'success',
-    createdAt: serverTimestamp(),
-  });
-};
-
-/**
- * Records a failed payment attempt for debugging
- */
-export const recordPaymentFailure = async (orderId, errorDescription) => {
-  try {
-    await addDoc(collection(db, 'payments'), {
-      orderId,
-      status: 'failed',
-      errorDescription,
-      createdAt: serverTimestamp(),
-    });
-  } catch (e) {
-    console.error('Could not record payment failure:', e);
-  }
-};
 
 /**
  * Formats amount for display: 1500 → "₹15.00"
