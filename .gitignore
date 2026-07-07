@@ -11,3 +11,7 @@ npm-debug.*
 veda/
 android/
 ios/
+
+# Environment secrets - never commit these
+.env
+functions/.env

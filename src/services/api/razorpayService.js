@@ -21,13 +21,13 @@ import { db } from '../firebase/firebaseConfig';
 
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 // Replace with your Razorpay Key ID from https://dashboard.razorpay.com
-const RAZORPAY_KEY_ID = 'rzp_test_T55EbaplJKBpPx'; // ← REPLACE THIS
+const RAZORPAY_KEY_ID = 'rzp_test_TAeKKzYiH2zniV';
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 /**
  * @typedef {Object} PaymentOptions
- * @property {number}  amount       - Amount in PAISE (₹1 = 100 paise)
- * @property {string}  orderId      - Your internal Firestore order ID
+ * @property {number}  amount       - Amount in RUPEES
+ * @property {Object}  orderData    - Full order payload written to Firestore on success
  * @property {string}  customerName
  * @property {string}  customerEmail
  * @property {string}  customerPhone
@@ -38,21 +38,28 @@ const RAZORPAY_KEY_ID = 'rzp_test_T55EbaplJKBpPx'; // ← REPLACE THIS
 /**
  * Opens the Razorpay payment sheet and handles success/failure
  * @param {PaymentOptions} options
- * @returns {Promise<{success: boolean, paymentId?: string, error?: string}>}
+ * @returns {Promise<{success: boolean, paymentId?: string, orderId?: string, error?: string}>}
  */
 export const initiateRazorpayPayment = async (options) => {
   const {
     amount,
-    orderData,          // Full order payload — written to Firestore only on success
+    orderData,
     customerName = '',
     customerEmail = '',
     customerPhone = '',
     description = 'Paaswala Order',
   } = options;
 
+  if (Platform.OS === 'web' || !RazorpayCheckout) {
+    return {
+      success: false,
+      error: 'Payments are only supported on the mobile app. Please use an Android or iOS device.',
+    };
+  }
+
   const razorpayOptions = {
     description,
-    image: 'https://i.imgur.com/3g7nmJC.png', // Your app logo URL
+    image: 'https://i.imgur.com/3g7nmJC.png',
     currency: 'INR',
     key: RAZORPAY_KEY_ID,
     amount: amount * 100, // Convert ₹ to paise
@@ -63,21 +70,12 @@ export const initiateRazorpayPayment = async (options) => {
       name: customerName,
     },
     theme: { color: '#007AFF' },
-    // Do NOT add config.display overrides — they restrict payment methods
-    // and cause "Can't pay with this UPI ID" errors.
   };
-
-  if (Platform.OS === 'web' || !RazorpayCheckout) {
-    return {
-      success: false,
-      error: 'Payments are only supported on the mobile app. Please use an Android or iOS device.',
-    };
-  }
 
   return new Promise((resolve) => {
     RazorpayCheckout.open(razorpayOptions)
       .then(async (paymentData) => {
-        // Payment confirmed — NOW create the order in Firestore
+        // Payment confirmed — write the order to Firestore
         try {
           const orderRef = await addDoc(collection(db, 'orders'), {
             ...orderData,
@@ -90,7 +88,7 @@ export const initiateRazorpayPayment = async (options) => {
 
           const orderId = orderRef.id;
 
-          // Also log to payments collection for audit trail
+          // Audit trail
           await addDoc(collection(db, 'payments'), {
             orderId,
             razorpayPaymentId: paymentData.razorpay_payment_id,
@@ -103,14 +101,10 @@ export const initiateRazorpayPayment = async (options) => {
           resolve({ success: true, paymentId: paymentData.razorpay_payment_id, orderId });
         } catch (dbError) {
           console.error('DB write after payment failed:', dbError);
-          // Payment was collected but order wasn't saved — still resolve success
-          // so UI can inform user and support can reconcile manually
           resolve({ success: true, paymentId: paymentData.razorpay_payment_id, orderId: null });
         }
       })
       .catch((error) => {
-        // error.code === 0 means user cancelled (varies by SDK version)
-        // Also check description string as a fallback
         const desc = (error.description || '').toLowerCase();
         const userCancelled =
           error.code === 0 ||
@@ -126,7 +120,6 @@ export const initiateRazorpayPayment = async (options) => {
       });
   });
 };
-
 
 /**
  * Formats amount for display: 1500 → "₹15.00"
