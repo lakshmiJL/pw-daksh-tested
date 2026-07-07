@@ -258,44 +258,16 @@ export default function AddAddressScreen({ route, navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/* Map Picker */}
+          {/* Map Picker (Temporarily Disabled) */}
           {showMap && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Pin Your Location</Text>
-              <Text style={styles.sectionSubtitle}>Tap on the map to adjust</Text>
+              <Text style={styles.sectionTitle}>Your Location Fetched</Text>
               
-              {Platform.OS === 'web' ? (
-                <View style={[styles.map, styles.webMapPlaceholder]}>
-                  <Text style={styles.webMapText}>📍 Map Preview Unavailable on Web</Text>
-                  <Text style={styles.webMapSubtext}>Coordinates: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}</Text>
-                  <Text style={styles.webMapHint}>Please use the mobile app for precise pinning.</Text>
-                </View>
-              ) : MapView ? (
-                <>
-                  <MapView
-                    ref={mapRef}
-                    style={styles.map}
-                    initialRegion={{
-                      latitude: location.latitude,
-                      longitude: location.longitude,
-                      latitudeDelta: 0.002,
-                      longitudeDelta: 0.002,
-                    }}
-                    onPress={handleMapPress}
-                  >
-                    <Marker
-                      coordinate={location}
-                      draggable
-                      onDragEnd={(e) => setLocation(e.nativeEvent.coordinate)}
-                    />
-                  </MapView>
-                  <Text style={styles.mapHint}>📌 Drag the pin to your exact location</Text>
-                </>
-              ) : (
-                <View style={[styles.map, styles.webMapPlaceholder]}>
-                  <Text>Map Library Error</Text>
-                </View>
-              )}
+              <View style={[styles.map, styles.webMapPlaceholder]}>
+                <Text style={styles.webMapText}>📍 Visual Map Temporarily Disabled</Text>
+                <Text style={styles.webMapSubtext}>Coordinates: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}</Text>
+                <Text style={styles.webMapHint}>We fetched your GPS coordinates. You can save your address below.</Text>
+              </View>
             </View>
           )}
 

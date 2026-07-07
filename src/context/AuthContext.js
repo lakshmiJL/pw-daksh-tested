@@ -33,8 +33,11 @@ export function AuthProvider({ children }) {
   const recaptchaVerifier = useRef(null);
 
   // Google OAuth setup
+  // NOTE: You must create separate Client IDs in Google Cloud Console
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '741920079969-shfcjka54slncmjhetb0m023b0fgn168.apps.googleusercontent.com',
+    expoClientId: '741920079969-shfcjka54slncmjhetb0m023b0fgn168.apps.googleusercontent.com',
+    iosClientId: '741920079969-o56gu4c5cur60ctfcgp2cpb75ld2sgjp.apps.googleusercontent.com',
+    androidClientId: '741920079969-h8dkjg7qsdf0mtgfcors4qrhf5v3i5no.apps.googleusercontent.com',
     redirectUri: makeRedirectUri({
       scheme: 'com.daksh.paaswala',
       path: 'oauth2redirect/google',

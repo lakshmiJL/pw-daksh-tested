@@ -143,12 +143,6 @@ const AuthScreen = () => {
               )}
             </TouchableOpacity>
 
-            <View style={styles.divider} />
-
-            <TouchableOpacity style={styles.googleButton} onPress={googleLogin}>
-              <Text style={styles.googleText}>Continue with Google</Text>
-            </TouchableOpacity>
-
             {Platform.OS === 'ios' && (
               <AppleAuthentication.AppleAuthenticationButton
                 buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}

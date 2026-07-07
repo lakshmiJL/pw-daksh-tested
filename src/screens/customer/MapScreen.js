@@ -1,4 +1,5 @@
 import React,{useEffect,useState} from 'react';
+import * as Location from 'expo-location';
 import { StyleSheet, View, Text, ActivityIndicator, Platform, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {collection,query,where,onSnapshot} from 'firebase/firestore';
@@ -18,8 +19,21 @@ if (Platform.OS !=='web'){
 const MapScreen = ({ navigation }) => {
     const[vendors,setVendors]=useState([]);
     const[loading,setLoading]=useState(true);
+    const[locationGranted, setLocationGranted] = useState(false);
+
     useEffect(()=>{
         if (!db) return;
+        
+        // Request location permission for showsUserLocation
+        (async () => {
+            try {
+                let { status } = await Location.requestForegroundPermissionsAsync();
+                setLocationGranted(status === 'granted');
+            } catch (err) {
+                console.warn('Could not request location permission:', err);
+            }
+        })();
+
     const q=query(collection(db,'users'),where('isOnline','==',true));
     const unsubscribe=onSnapshot(q,(snapshot)=>{
         const activeVendors=[];
@@ -67,33 +81,15 @@ return(
         <View style={styles.header}>
             <Text style={styles.headerTitle}>Explore Mohalla</Text>
         </View>
-        <MapView
-            style={styles.map}
-            initialRegion={{
-                latitude:28.6139,//Default to Delhi region
-                longitude:77.2090,
-                latitudeDelta:0.05,
-                longitudeDelta:0.05,
-            }}
-            showsUserLocation={true}>
-                {vendors.map((vendor)=>(
-                    <Marker
-                        key={vendor.id}
-                        coordinate={vendor.location}
-                        pinColor="red"
-                    >
-                        <Callout onPress={() => navigation.navigate('VendorProfileFromMap', { vendorId: vendor.id, vendor })}>
-                            <View style={styles.callout}>
-                            <Text style={styles.vendorName}>{vendor.stallName || vendor.email.split('@')[0]}</Text>
-                            <Text style={styles.vendorStatus}>Live Now</Text>
-                            <Text style={styles.tapText}>Tap to view menu</Text>
-                            </View>
-                        </Callout>
-                     </Marker>
-                ))}
-            </MapView>
+        <View style={styles.center}>
+            <Text style={{ fontSize: 40, marginBottom: 10 }}>🗺️</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 5 }}>Map Temporarily Disabled</Text>
+            <Text style={{ textAlign: 'center', color: '#666', paddingHorizontal: 40 }}>
+                We've disabled the visual map for now so you can test the app without needing a Google Maps API Key. 
+            </Text>
+            <Text style={{ marginTop: 20, color: '#007bff' }}>{vendors.length} vendors are online right now!</Text>
+        </View>
     </SafeAreaView>
-    
 )
 }
 const styles=StyleSheet.create({
